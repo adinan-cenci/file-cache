@@ -1,0 +1,137 @@
+* {
+    box-sizing: border-box;
+}
+
+html, 
+body {
+    min-height: 100%;
+}
+
+body {
+    padding: 0px;
+    margin: 0px;
+    font-family: 'Source Code Pro', 'Inconsolata', 'Courier';
+    font-size: 16px;
+    line-height: 1.3em;
+    color: #000;
+    
+    background: -webkit-linear-gradient(top, #B7DCEF, #D4E5ED);
+    background: -moz-linear-gradient(top, #B7DCEF, #D4E5ED);
+}
+
+h1, h2, h3, h4, 
+p, 
+pre {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Roboto', 'Arial';
+}
+
+pre:last-child, 
+p:last-child {
+    margin-bottom: 0px;
+}
+
+hr {
+    border: none;
+    border-top: solid 1px #000;
+    margin: 20px 0px 20px 0px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+    table td, 
+    table th {
+        padding: 10px;
+        border: solid 1px #666;
+    }
+
+    table th {
+        color: #fff;
+        background-color: #7d9ee0;
+    }
+
+
+input, 
+select, 
+textarea {
+    padding: 7px;
+    width: 100%;
+    border: solid 1px #343d46;
+    margin-bottom: 5px;
+    color: inherit;
+    background-color: #efefef;
+}
+
+input[type=radio], 
+input[type=checkbox] {
+    width: 20px;
+}
+
+input[type=submit] {
+    color: #232830;
+    border-color: #d9d9d9;
+    background-color: #d9d9d9;
+}
+
+
+#everything {
+    width: 1200px;
+    max-width: 100%;
+    padding-top: 40px;
+    margin: auto;
+}
+
+.foreground {
+    background-color: #fff;  
+}
+
+.foreground h1, 
+.foreground caption {    
+    padding: 20px;
+    color: #fff;
+    font-family: 'Roboto', 'Arial';
+    font-size: 32px;
+    line-height: 1em;
+    font-weight: 700;
+    text-align: left;
+    background: #2F5BB2;
+}
+
+table.foreground td {
+    border: solid 1px #E4E4E4;
+}
+
+div.foreground {
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 40px;
+}
+
+    div.foreground h1 {
+        width: calc(100% + 40px);
+        border-radius: 5px 5px 0px 0px;
+        margin: -20px 0px 20px -20px;
+    }
+
+/*----------------------------------*/
+
+table.label-value td {
+    width: 50%;
+    text-align: left;    
+}
+
+table.label-value td:first-child {
+    text-align: right;
+    font-weight: bold;
+}
+
+table.label-value td:first-child:last-child {
+    text-align: center;
+}
