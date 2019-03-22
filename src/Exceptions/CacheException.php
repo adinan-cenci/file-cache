@@ -1,5 +1,5 @@
 <?php
-namespace AdinanCenci\FileCache;
+namespace AdinanCenci\FileCache\Exceptions;
 
 class CacheException extends \Exception implements 
     \Psr\SimpleCache\CacheException 

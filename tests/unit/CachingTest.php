@@ -1,119 +1,114 @@
-<?php
-require __DIR__.'/Reflections.php';
+<?php 
+use AdinanCenci\FileCache\Cache;
+use AdinanCenci\FileCache\Exceptions\DirectoryDoesNotExist;
+use AdinanCenci\FileCache\Exceptions\IsNotADirectory;
+use AdinanCenci\FileCache\Exceptions\DirectoryIsNotReadable;
+use AdinanCenci\FileCache\Exceptions\DirectoryIsNotWritable;
+use AdinanCenci\FileCache\Exceptions\InvalidCacheId;
+use AdinanCenci\FileCache\Exceptions\InvalidTimeToLive;
 
-use \AdinanCenci\FileCache\Cache;
-
-class CachingTest extends Reflections
+class CachingTest extends \PHPUnit\Framework\TestCase 
 {
-    public function __destruct() 
+    protected $cacheDir = null;
+
+    public function __construct($name = null, $data = [], $dataName = '') 
     {
-        $this->newCache()->clear();
+        $this->cacheDir = __DIR__.'/cache-directory/';
+        parent::__construct($name, $data, $dataName);
     }
 
-    public function testSanitizingDirectoryPath() 
+    public function testExceptionDirDoesntExist() 
     {
-        $cache      = $this->newCache();
+        $this->assertEquals(1, 1);
+        $dir = __DIR__.'/non-existing-directory/';
 
-        $expected   = 'path/to/cache/';
+        try {
+            new Cache($dir);
+        } catch (DirectoryDoesNotExist $e) {
+            $exception = $e->getMessage();
+        }
 
-        $sanitized  = $this->invokeProtectedMethod($cache, 'sanitizeDir', array(
-            'directory' => 'path\to\cache'
-        ));
-
-        $this->assertEquals($expected, $sanitized);
+        $expecting = 
+        'Directory '.$dir.' doesn\'t exists';
+        $this->assertEquals($expecting, $exception);
     }
 
-    public function testGeneratingCacheFilename() 
+    public function testExceptionDirIsNotWritable() 
     {
-        $cache      = $this->newCache();
+        chmod($this->cacheDir, 0100);
 
-        $expected   = 'cache-myItemToBeCached.php';
+        try {
+            new Cache($this->cacheDir);
+        } catch (DirectoryIsNotWritable $e) {
+            $exception = $e->getMessage();
+        }
 
-        $filename   = $this->invokeProtectedMethod($cache, 'getCachedFileName', array(
-            'key' => 'myItemToBeCached'
-        ));
+        chmod($this->cacheDir, 0777);
 
-        $this->assertEquals($expected, $filename);
+        $expecting = 
+        $this->cacheDir.' is not writable';
+        $this->assertEquals($expecting, $exception);
+    }
+    
+    public function testExceptionDirIsNotReadable() 
+    {
+        chmod($this->cacheDir, 0333);
+
+        try {
+            new Cache($this->cacheDir);
+        } catch (DirectoryIsNotReadable $e) {
+            $exception = $e->getMessage();
+        }
+
+        chmod($this->cacheDir, 0777);
+
+        $expecting = 
+        $this->cacheDir.' is not readable';
+        $this->assertEquals($expecting, $exception);
     }
 
-    public function testGeneratingExpirationFilename() 
+    public function testValidCacheIdentifier() 
     {
-        $cache      = $this->newCache();
+        $cache      = new Cache($this->cacheDir);
 
-        $expected   = 'cache-myItemToBeCached.txt';
-
-        $filename   = $this->invokeProtectedMethod($cache, 'getExpirationFileName', array(
-            'key' => 'myItemToBeCached'
-        ));
-
-        $this->assertEquals($expected, $filename);
+        $this->assertTrue($cache->isValidKey('thisShouldBeValid'));
+        $this->assertFalse($cache->isValidKey('@this{Should}Not'));
     }
 
-    public function testCachingData() 
+    public function testCachingValue() 
     {
-        $cache      = $this->newCache();
+        $cache      = new Cache($this->cacheDir);
+        $success    = $cache->set('key', 'value');
 
-        $expected   = true;
-
-        $cache->set('myData', 'value');
-
-        $exists     = $this->invokeProtectedMethod($cache, 'has', array(
-            'key' => 'myData'
-        ));
-
-        $this->assertEquals($expected, $exists);
+        $this->assertTrue($success);
+        $this->assertTrue(file_exists($this->cacheDir.'cache-key.php'));
     }
 
-    public function testUnsettingCachedData() 
+    public function testRetrievingCachedValue() 
     {
-        $cache      = $this->newCache();
+        $cache      = new Cache($this->cacheDir);
+        $value      = 'foo bar';
+        $success    = $cache->set('key2', $value);
 
-        $expected   = false;
-
-        $cache->set('myData', 'value');
-        $cache->delete('myData');
-
-        $exists     = $this->invokeProtectedMethod($cache, 'has', array(
-            'key' => 'myData'
-        ));
-
-        $this->assertEquals($expected, $exists);
+        $this->assertEquals($value, $cache->get('key2'));
     }
 
-    public function testExpirationDate() 
+    public function testDeleteCachedValue() 
     {
-        $cache      = $this->newCache();
+        $cache      = new Cache($this->cacheDir);
+        $success    = $cache->delete('key3');
 
-        $ttl        = 60 * 60 * 5;
-        $expected   = time() + $ttl;
-
-        $cache->set('something', 'value', $ttl);
-
-        $expiration = $this->invokeProtectedMethod($cache, 'getExpiration', array(
-            'key' => 'something'
-        ));
-
-        $this->assertEquals($expected, $expiration);
+        $this->assertTrue($success);
+        $this->assertFalse(file_exists($this->cacheDir.'cache-key3.php'));
     }
 
-    public function testExpiration() 
+    public function testTimeToLive() 
     {
-        $cache      = $this->newCache();
+        $cache      = new Cache($this->cacheDir);
+        $success    = $cache->set('key4', 'value', 2);
 
-        $ttl        = 60 * 60 * 5;
-        $expected   = false;
+        sleep(3);
 
-        $cache->set('something', 'value', $ttl);
-
-        $expired    = $this->invokeProtectedMethod($cache, 'expired', array(
-            'key' => 'something'
-        ));
-
-        $this->assertEquals($expected, $expired);
+        $this->assertTrue($cache->expired('key4'));
     }
-
-    protected function newCache() 
-    {        
-        return new Cache(__DIR__.'/cache-directory/');
-    }    
 }

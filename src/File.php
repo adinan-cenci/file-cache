@@ -25,6 +25,10 @@ class File
         if ($var == 'expiration') {
             return $this->getExpiration();
         }
+
+        if ($var == 'expired') {
+            return $this->isExpired();
+        }
     }
 
     public function doesExists() 

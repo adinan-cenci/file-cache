@@ -1,46 +1,48 @@
 
+
 # Caching
-This is a PSR-16 implementation build around the php Filesystem.
+This is a [PSR-16](https://www.php-fig.org/psr/psr-16/) implementation build around the php Filesystem.
 
 ## How to use it
-
-Once instantiated, use like specified in the PSR-16
+Once instantiated, use like specified in the [PSR-16](https://www.php-fig.org/psr/psr-16/)
 
 ```php
 use AdinanCenci\FileCache\Cache;
-$cache = new Cache('my-directory/');
+$cache = new Cache('my-cache-directory/');
 ```
 
 ### Caching
-
+Inform an unique identifier for the data you desire to cache. Optionally you may inform its time to live, otherwise the cached data will never expire.
 ```php
-$cache->set('something', $someObject, 60 * 60 * 24);
+$cache->set('somethingCostlyToAcquire', $value, 60 * 60 * 24);
+```
 
-// or
-
+### Caching multiple values at once
+```php
 $cache->setMultiple([
-    'object1'       => $object1, 
-    'value1'        => $value1, 
-    'anotherObject' => $someObject
+    'foo'           => $bar, 
+    'hello'         => $world, 
+    'myObject'      => $myObject
 ], 60 * 60 * 24);
 ```
 
 ### Retrieving
-
+Use ::get to retrieve your data, if the data doesn't exist in cache or has expired then a fallback value will be returned, which defaults to null if not informed.
 ```php
-$cache->get('something', $fallBackValue);
+$fallback = 'nothing here';
+$cache->get('somethingCostlyToAcquire', $fallback);
+```
 
-// or
-
+### Retrieving multiple values at once
+```php
 $cache->getMultiple([
     'object1'       => $object1, 
     'value1'        => $value1, 
     'anotherObject' => $someObject
-], $fallBackValue);
+], $fallback);
 ```
 
 ## How to install
-
 Use composer
 
 ```json
@@ -51,7 +53,6 @@ Use composer
     }
 ], 
 "require": {
-    "adinan-cenci/file-cache" : "1.0.0"
+    "adinan-cenci/file-cache" : "^1.0.0"
 }
 ```
-

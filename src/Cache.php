@@ -1,23 +1,32 @@
 <?php
 namespace AdinanCenci\FileCache;
 
+use \AdinanCenci\FileCache\Exceptions\DirectoryDoesNotExist;
+use \AdinanCenci\FileCache\Exceptions\IsNotADirectory;
+use \AdinanCenci\FileCache\Exceptions\DirectoryIsNotReadable;
+use \AdinanCenci\FileCache\Exceptions\DirectoryIsNotWritable;
+use \AdinanCenci\FileCache\Exceptions\InvalidCacheId;
+use \AdinanCenci\FileCache\Exceptions\InvalidTimeToLive;
+
 class Cache implements \Psr\SimpleCache\CacheInterface 
 {
-    /** @property string    $directory  Path to directory to store the cached files */
     protected $directory    = null;
-    
-    /** @property array     $files      File class array */
     protected $files        = array();    
 
-    public function __construct(/*string*/ $directory) 
+    public function __construct($directory) 
     {
         $directory          = $this->sanitizeDir($directory);        
         $this->validateDir($directory);        
         $this->directory    = $directory;
     }
 
+    public function __destruct() 
+    {
+        $this->closeAllFiles();
+    }
+
     /**
-     * @param string $key unique identifier
+     * @param string $key Unique identifier
      * @param mixed $default Fallback value
      * @return mixed
      */
@@ -99,8 +108,8 @@ class Cache implements \Psr\SimpleCache\CacheInterface
     }
 
     /**
-     * @param array $values name, value pairs
-     * @param null|int|DateInterval $ttl 
+     * @param array $values key-value pairs
+     * @param null|int|DateInterval $ttl Time to live
      * @param boolean
      */
     public function setMultiple($values, $ttl = null) 
@@ -134,7 +143,6 @@ class Cache implements \Psr\SimpleCache\CacheInterface
     public function has($key) 
     {
         $this->validateKey($key);
-
         return $this->setted($key);
     }
 
@@ -148,16 +156,30 @@ class Cache implements \Psr\SimpleCache\CacheInterface
         return $this->getFile($key)->unlock();
     }
 
-    /*----------------------------------------------------*/
+    /**
+     * Evaluates if $key is a valid PSR-16 id
+     * @param string $key
+     * @return bool
+     */
+    public function isValidKey($key) 
+    {
+        # valid:                A-Za-z0-9_.
+        # valid by extension:   çãâéõ ... etc
+        # invalid:              {}()/\@:
+
+        return !preg_match('/[\{\}\(\)\/\\\@]/', $key);
+    }
 
     /**
      * @param string $key Unique identifier
      * @return bool
      */
-    protected function expired($key) 
+    public function expired($key) 
     {
-        $this->getFile($key)->expired;
+        return $this->getFile($key)->expired;
     }
+
+    /*----------------------------------------------------*/
 
     /**
      * @param string $key Unique identifier
@@ -232,7 +254,7 @@ class Cache implements \Psr\SimpleCache\CacheInterface
 
     protected function getFile($file) 
     {
-        if (! $this->isFileRelatedToCache($file)) {
+        if (! $this->isValidCacheFileName($file)) {
             $file = $this->getCachePath($file);
         }
 
@@ -260,61 +282,56 @@ class Cache implements \Psr\SimpleCache\CacheInterface
             return $dir.$file;
         }, scandir($this->directory));
 
-        return array_filter($files, [$this, 'isFileRelatedToCache']);
+        return array_filter($files, [$this, 'isValidCacheFileName']);
     }
 
     protected function validateKey($key) 
     {
-        if (! $this->validKey($key)) {
-            throw new InvalidArgumentException('Invalid key');
+        if (! $this->isValidKey($key)) {
+            throw new InvalidCacheId('"'.$key.'"" is an invalid cache ID');
         }
     }
 
     protected function validateTtl($ttl) 
     {
         if (! $this->validTtl($ttl)) {
-            throw new InvalidArgumentException('Invalid ttl');
-        }        
+            throw new InvalidTimeToLive('Invalid time to live');
+        }
     }
 
     protected function validateDir($directory) 
     {
-        if (! $this->valideDir($directory)) {
-            throw new InvalidArgumentException('The directory is either unwritable, unreadable or doesn\'t exist');
+        if (! file_exists($directory)) {
+            throw new DirectoryDoesNotExist('Directory '.$directory.' doesn\'t exists', 1);
+            return false;
         }
+
+        if (! is_dir($directory)) {
+            throw new IsNotADirectory($directory.' is not a directory', 1);
+            return false;
+        }
+
+        if (! is_writable($directory)) {
+            throw new DirectoryIsNotWritable($directory.' is not writable', 1);
+            return false;
+        }
+
+        if (! is_readable($directory)) {
+            throw new DirectoryIsNotReadable($directory.' is not readable', 1);
+            return false;
+        }
+
+        return true;
     }
 
-    /**
-     * Evaluates if $key is a valid psr-16 id
-     * @param string $key
-     * @return bool
-     */
-    protected function validKey($key) 
+    protected function isValidCacheFileName($string) 
     {
-        # valid:                A-Za-z0-9_.
-        # valid by extension:   çãâéõ ... etc
-        # invalid:              {}()/\@:
-
-        return !preg_match('/[\{\}\(\)\/\\\@]/', $key);
-    }
-
-    protected function isFileRelatedToCache($fileName) 
-    {
-        return preg_match('/cache-[A-Za-z0-9_.]*\.php$/', $fileName);
+        return preg_match('/cache-[A-Za-z0-9_.]*\.php$/', $string);
     }
 
     protected function validTtl($ttl) 
     {
         return is_int($ttl) or $ttl instanceof \DateInterval or $ttl == null;  
-    }
-
-    protected function valideDir($directory) 
-    {
-        return 
-        file_exists($directory) and 
-        is_dir($directory)      and 
-        is_writable($directory) and 
-        is_readable($directory);
     }
 
     protected function sanitizeDir($directory) 
