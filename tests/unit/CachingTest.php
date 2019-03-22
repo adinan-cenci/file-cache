@@ -1,12 +1,10 @@
 <?php
-
 require __DIR__.'/Reflections.php';
 
-use \AdinanCenci\Cache\Cache;
+use \AdinanCenci\FileCache\Cache;
 
 class CachingTest extends Reflections
 {
-
     public function __destruct() 
     {
         $this->newCache()->clear();
@@ -22,7 +20,7 @@ class CachingTest extends Reflections
             'directory' => 'path\to\cache'
         ));
 
-        $this->assertEquals($sanitized, $expected);
+        $this->assertEquals($expected, $sanitized);
     }
 
     public function testGeneratingCacheFilename() 
@@ -35,7 +33,7 @@ class CachingTest extends Reflections
             'key' => 'myItemToBeCached'
         ));
 
-        $this->assertEquals($filename, $expected);        
+        $this->assertEquals($expected, $filename);
     }
 
     public function testGeneratingExpirationFilename() 
@@ -48,7 +46,7 @@ class CachingTest extends Reflections
             'key' => 'myItemToBeCached'
         ));
 
-        $this->assertEquals($filename, $expected);        
+        $this->assertEquals($expected, $filename);
     }
 
     public function testCachingData() 
@@ -63,7 +61,7 @@ class CachingTest extends Reflections
             'key' => 'myData'
         ));
 
-        $this->assertEquals($exists, $expected);   
+        $this->assertEquals($expected, $exists);
     }
 
     public function testUnsettingCachedData() 
@@ -79,7 +77,7 @@ class CachingTest extends Reflections
             'key' => 'myData'
         ));
 
-        $this->assertEquals($exists, $expected);   
+        $this->assertEquals($expected, $exists);
     }
 
     public function testExpirationDate() 
@@ -95,7 +93,7 @@ class CachingTest extends Reflections
             'key' => 'something'
         ));
 
-        $this->assertEquals($expiration, $expected);   
+        $this->assertEquals($expected, $expiration);
     }
 
     public function testExpiration() 
@@ -111,13 +109,11 @@ class CachingTest extends Reflections
             'key' => 'something'
         ));
 
-        $this->assertEquals($expired, $expected);   
+        $this->assertEquals($expected, $expired);
     }
-    
-
 
     protected function newCache() 
     {        
-        return new Cache(__DIR__.'/cache-directory');
+        return new Cache(__DIR__.'/cache-directory/');
     }    
 }
