@@ -49,7 +49,6 @@ class File
     }
 
     /**
-     * @param string $key Unique identifier
      * @return bool
      */
     protected function isExpired() 
@@ -62,10 +61,9 @@ class File
     }
 
     /**
-     * @param string $key Unique identifier
      * @param int timestamp
      */
-    public function setExpiration($key, $time) 
+    public function setExpiration($time) 
     {
         return touch($this->path, $time);
     }

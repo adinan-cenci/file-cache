@@ -20,8 +20,8 @@ $cache->set('somethingCostlyToAcquire', $value, 60 * 60 * 24);
 ### Caching multiple values at once
 ```php
 $cache->setMultiple([
-    'foo'           => $bar, 
-    'hello'         => $world, 
+    'foo'           => $bar,
+    'hello'         => $world,
     'myObject'      => $myObject
 ], 60 * 60 * 24);
 ```
@@ -36,9 +36,9 @@ $cache->get('somethingCostlyToAcquire', $fallback);
 ### Retrieving multiple values at once
 ```php
 $cache->getMultiple([
-    'object1'       => $object1, 
-    'value1'        => $value1, 
-    'anotherObject' => $someObject
+    'object1', 
+    'value1',
+    'anotherObject'
 ], $fallback);
 ```
 
@@ -51,7 +51,7 @@ Use composer
         "type": "vcs",
         "url": "https://github.com/adinan-cenci/file-cache"
     }
-], 
+],
 "require": {
     "adinan-cenci/file-cache" : "^1.0.0"
 }

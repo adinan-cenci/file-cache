@@ -204,7 +204,7 @@ class Cache implements \Psr\SimpleCache\CacheInterface
             return false;
         }
 
-        return $file->setExpiration($key, $expiration);
+        return $file->setExpiration($expiration);
     }
 
     /**
