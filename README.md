@@ -46,3 +46,6 @@ Use composer
 ```cmd
 composer require adinan-cenci/file-cache
 ```
+
+## License
+MIT
