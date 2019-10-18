@@ -1,14 +1,14 @@
 {
     "name": "adinan-cenci/file-cache",
-    "description": "A PSR-16 implementation.", 
+    "description": "A PSR-16 implementation around the PHP Filesystem.", 
     "type": "library", 
-    "keywords": ["files", "cache"], 
+    "keywords": ["files", "cache", "PSR-16"], 
     "license": "MIT",
-    "version": "1.0.0", 
+    "version": "1.0.2", 
     "authors": [
         {
             "name": "Adinan Cenci",
-            "email": "adinancenci@gmail.com", 
+            "email": "adinancenci@protonmail.com", 
             "role": "developer"
         }
     ],

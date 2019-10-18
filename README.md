@@ -1,5 +1,3 @@
-
-
 # Caching
 This is a [PSR-16](https://www.php-fig.org/psr/psr-16/) implementation build around the php Filesystem.
 
@@ -45,14 +43,6 @@ $cache->getMultiple([
 ## How to install
 Use composer
 
-```json
-"repositories" : [
-    {
-        "type": "vcs",
-        "url": "https://github.com/adinan-cenci/file-cache"
-    }
-],
-"require": {
-    "adinan-cenci/file-cache" : "^1.0.0"
-}
+```cmd
+composer require adinan-cenci/file-cache
 ```

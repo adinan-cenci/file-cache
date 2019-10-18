@@ -5,12 +5,17 @@ ini_set('display_errors', 1);
 /*--------------------------------*/
 
 require '../vendor/autoload.php';
-
 use AdinanCenci\FileCache\Cache;
 
 /*--------------------------------*/
 
-$cache = new Cache(__DIR__.'/cache/');
+try {
+    $cache = new Cache(__DIR__.'/cache/');
+} catch (\Exception $e) {
+    echo 
+    $e->getMessage();
+    die();
+}
 
 /*--------------------------------*/
 
@@ -34,12 +39,12 @@ echo
     
     <h2>Caching multiple files</h2>
     <p>*', 
-        $cache->setMultiple([
+        $cache->setMultiple(array(
             'father'     => $father, 
-            'wife'         => $wife, 
-            'son'         => $son, 
-            'epic'        => $epic
-        ], 60 * 60 * 5) ? 'details cached' : 'failed caching the details', 
+            'wife'       => $wife, 
+            'son'        => $son, 
+            'epic'       => $epic
+        ), 60 * 60 * 5) ? 'details cached' : 'failed caching the details', 
     '</p>
 </div>';
 
@@ -53,7 +58,7 @@ echo
         $cache->get('name').' is ',
         vsprintf(
             'son of %s, husband of %s and father of %s. He is the protagonist of the epic %s', 
-            $cache->getMultiple(['father', 'wife', 'son', 'epic'])
+            $cache->getMultiple(array('father', 'wife', 'son', 'epic'))
         ), 
     '</p>
 </div>';

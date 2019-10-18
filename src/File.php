@@ -9,7 +9,7 @@ class File
 
     public function __construct($path) 
     {
-        return $this->path = $path;
+        $this->path = $path;
     }
 
     public function __get($var) 
