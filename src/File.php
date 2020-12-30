@@ -4,8 +4,6 @@ namespace AdinanCenci\FileCache;
 class File 
 {
     protected $path     = null;
-    protected $file     = null;
-    protected $locked   = false;
 
     public function __construct($path) 
     {
@@ -14,10 +12,6 @@ class File
 
     public function __get($var) 
     {
-        if ($var == 'locked') {
-            return $this->locked;
-        }
-
         if ($var == 'exists') {
             return $this->doesExists();
         }
@@ -70,16 +64,20 @@ class File
 
     public function delete() 
     {
-        $this->close();
-        if (file_exists($this->file)) {
-            return unlink($this->file);
+        if (file_exists($this->path)) {
+            return unlink($this->path);
         }
+
         return true;
     }
 
     public function read() 
     {
-        return fread($this->open(), filesize($this->path));
+        $file     = fopen($this->path, 'r');
+        $contents = fread($file, filesize($this->path));
+        fclose($file);
+
+        return $contents;
     }
 
     /**
@@ -88,71 +86,29 @@ class File
      */
     public function write($content) 
     {
-        if (! $this->open()) {
+        $file     = fopen($this->path, 'w');
+        $this->lock($file);
+        $bytes    = fwrite($file, $content);
+        $this->unlock($file);
+        fclose($file);
+
+        return $bytes > 0;
+    }
+
+    protected function lock($file) 
+    {
+        $locked = flock($file, \LOCK_EX | \LOCK_NB, $eWouldBlock);
+
+        if ($file == false || $locked == false || $eWouldBlock) {
             return false;
         }
-        
-        $success = fwrite($this->open(), $content);
-        $this->close();
-
-        return $success;
-    }
-
-    /**
-     * @return bool
-     */
-    public function lock() 
-    {
-        $this->open();
-        $locked = flock($this->file, LOCK_EX | LOCK_NB, $eWouldBlock);
-
-        if ($this->file == false || $locked == false || $eWouldBlock) {
-            return $this->locked = false;
-        }
-
-        return $this->locked = true;
-    }
-
-    /**
-     * @return bool
-     */
-    public function unlock() 
-    {
-        if (! $this->locked) {
-            return true;
-        }
-
-        $this->locked = false;
-        return flock($this->file, LOCK_UN);        
-    }
-    
-    /**
-     * @return resource|false
-     */
-    public function open() 
-    {
-        if (! $this->file) {
-            $mode       = file_exists($this->path) ? 'r+' : 'w+';
-            $this->file = fopen($this->path, $mode);
-        }
-
-        return $this->file;
-    }
-
-    /**
-     * @return bool
-     */
-    public function close() 
-    {
-        if (! $this->file) {
-            return true;
-        }
-
-        $this->unlock();
-
-        fclose($this->file);
-        $this->file = null;
 
         return true;
+    }
+
+
+    protected function unlock($file) 
+    {
+        return flock($file, \LOCK_UN);        
     }
 }

@@ -20,11 +20,6 @@ class Cache implements \Psr\SimpleCache\CacheInterface
         $this->directory    = $directory;
     }
 
-    public function __destruct() 
-    {
-        $this->closeAllFiles();
-    }
-
     /**
      * @param string $key Unique identifier
      * @param mixed $default Fallback value
@@ -82,8 +77,6 @@ class Cache implements \Psr\SimpleCache\CacheInterface
      */
     public function clear() 
     {
-        $this->closeAllFiles();
-
         $files = $this->getAllCacheRelatedFiles();
         foreach ($files as $file) {
             $this->getFile($file)->delete();
@@ -144,16 +137,6 @@ class Cache implements \Psr\SimpleCache\CacheInterface
     {
         $this->validateKey($key);
         return $this->setted($key);
-    }
-
-    public function lock($key) 
-    {
-        return $this->getFile($key)->lock();
-    }
-
-    public function unlock($key) 
-    {
-        return $this->getFile($key)->unlock();
     }
 
     /**
@@ -263,15 +246,6 @@ class Cache implements \Psr\SimpleCache\CacheInterface
         }
 
         return $this->files[$file];
-    }
-
-    protected function closeAllFiles() 
-    {
-        foreach ($this->files as $file) {
-            $file->close();
-        }
-
-        $this->files = array();
     }
 
     protected function getAllCacheRelatedFiles() 
