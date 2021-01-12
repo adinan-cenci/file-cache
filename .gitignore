@@ -1,4 +1,5 @@
 vendor/
+tests/unit/cache-directory/*
 phpunit.xml
 composer.lock
 test-phpunit.sh
