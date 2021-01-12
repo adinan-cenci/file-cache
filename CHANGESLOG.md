@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [2.0.1] - 2021-01-12
 ### Fixed
 - Stoped tracking changes to cache files in the unit test folder, 
-  so Github stop labeling my project as hacked. Thanks Github.
+  so as to stop Github from labeling my project as hacked. 
+  Thanks Github.
 
 
 ## [2.0.0] - 2020-12-30
